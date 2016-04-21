@@ -38,16 +38,33 @@
    returns: nil"
   (comp h/close-datasource :datasource))
 
-(defmacro with-conn [& exprs]
+(defmacro with-conn
+  "[macro] Executes code within the scope of a connection to the database
+   args: [[name pool] & exprs]
+     name: symbol to bind the connection to in the scope
+     pool: pool as returned from make-pool
+     writability: one of :ro, :rw. Whether to lock for read only"
+  [& exprs]
   `(j/with-db-connection ~@exprs))
 
-(def prep j/prepare-statement)
+(defn prep
+  "Prepares a query against the given connection
+   args: [conn sql]
+   returns: PreparedStatement"
+  [{:keys [connection]} sql]
+  (j/prepare-statement connection sql))
 
-(defmacro with-prep [conn names & exprs]
+(defmacro with-prep
+  "[macro] Prepares one or more queries against the connection
+   args: [conn query-bindings & exprs]
+     query-bindings: a vector that looks like assignment. each first item
+                     is a symbol to bind the PreparedStatement to and each
+                     second item is a sql string"
+  [conn names & exprs]
   (when (not= 0 (mod (count names) 2))
     (throw (ex-info "with-prepared assignment vector is uneven" {})))
   (letfn [(f [[name sql]]
-            [name `(prep (:connection ~conn) ~sql)])]
+            [name `(prep ~conn ~sql)])]
     (let [parts (partition 2 names)
           names (map first parts)
           assigns (vec (mapcat f parts))
