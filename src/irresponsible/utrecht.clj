@@ -1,98 +1,5 @@
 (ns irresponsible.utrecht
-  (:require [mpg.core :as mpg]
-            [clojure.java.jdbc :as j]
-            [hikari-cp.core :as h]))
-
-(def setup
-  "Installs conversion hooks for postgres datatypes
-   args: []
-   returns: nil"
-  mpg/patch)
-
-(defn make-pool
-  "Given a HikariCP configuration map, creates a pool
-   Args: [conf]
-     conf should be a map of parameters as accepted by hikari
-   Returns: pool"
-  [conf]
-  ;; apply defaults
-  {:datasource
-   (-> {:adapter "postgresql"
-        :port-number 5432
-        :server-name "localhost"
-        :auto-commit false}
-       ;; :connection-timeout 30000
-       ;; :validation-timeout 5000
-       ;; :idle-timeout       600000
-       ;; :max-lifetime       1800000
-       ;; :minimum-idle       10
-       ;; :maximum-pool-size  10
-       ;; :pool-name          "db-pool"       
-       ;; :register-mbeans false
-       (merge conf)
-       h/make-datasource)})
-
-(def close-pool
-  "Closes the given pool
-   args: [pool]
-   returns: nil"
-  (comp h/close-datasource :datasource))
-
-(defmacro with-conn
-  "[macro] Executes code within the scope of a connection to the database
-   args: [[name pool] & exprs]
-     name: symbol to bind the connection to in the scope
-     pool: pool as returned from make-pool
-     writability: one of :ro, :rw. Whether to lock for read only"
-  [& exprs]
-  `(j/with-db-connection ~@exprs))
-
-(defn prep
-  "Prepares a query against the given connection
-   args: [conn sql]
-   returns: PreparedStatement"
-  [{:keys [connection]} sql]
-  (j/prepare-statement connection sql))
-
-(defmacro with-prep
-  "[macro] Prepares one or more queries against the connection
-   args: [conn query-bindings & exprs]
-     query-bindings: a vector that looks like assignment. each first item
-                     is a symbol to bind the PreparedStatement to and each
-                     second item is a sql string"
-  [conn names & exprs]
-  (when (not= 0 (mod (count names) 2))
-    (throw (ex-info "with-prepared assignment vector is uneven" {})))
-  (letfn [(f [[name sql]]
-            [name `(prep ~conn ~sql)])]
-    (let [parts (partition 2 names)
-          names (map first parts)
-          assigns (vec (mapcat f parts))
-          closes (mapv (partial list '.close) names)]
-      `(let ~assigns
-         (try
-           (do ~@exprs)
-           (finally ~@closes))))))
-
-(defn query
-  "Executes a query that returns some results (e.g. select)
-   args: [conn sql bind-params-vec]
-     params should be a vector of param values
-   returns: resultset or nil"
-  [conn sql bind-params-vec]
-  (j/query conn (into [sql] bind-params-vec)))
-
-(defn execute
-  "Executes a query that does not return a result with zero or more sets of params
-   args: [conn sql & bind-params-vecs]
-   returns: vector of update counts"
-  [conn q & bind-params-vecs]
-  (j/execute! conn (into [q] bind-params-vecs)
-              {:transaction? false  :multi? true}))
-
-(defn q [pool sql args]
-  (with-conn [conn pool]
-    (query conn sql args)))
+  (:require [clojure.java.jdbc :as j]))
 
 (def isolations
   #{:none            
@@ -101,26 +8,110 @@
     :repeatable-read  ; prevent fuzzy read
     :serializable})   ; prevent phantoms
 
+(defprotocol Pool
+  (get-conn [p]
+    "Gets a connection from the pool. Is assumed to be Closeable.
+     args: [pool]
+     returns: Conn
+     throws: if we cannot obtain a connection"))
+
+(defprotocol Conn
+  (prepare [c q]
+    "Prepares the given sql query
+     args: [conn sql]
+     returns: java.sql.PreparedStatement
+     throws: on i/o error")
+  (query [c q] [c q bs]
+    "Runs the given query and returns a seq of result maps
+     args [conn q] [conn q bs]
+       q: a sql string or PreparedStatement
+       bs: optional vector of binding parameters
+     returns: seq of map")
+  (execute [conn q] [conn q bs]
+    "Executes a query that does not return a result with zero or more sets of params
+     args: [conn q] [conn q bs]
+       q: a sql string or PreparedStatement
+       bs: optional vector of binding parameters
+     returns: vector of update counts")
+  (savepoint [conn name]
+    "Creates a savepoint with the given name;
+     args: [conn name]")
+  (rollback [conn name]
+    "Rolls back the given transaction, optionally to the named savepoint
+     args: [conn] [conn name]"))
+
+(letfn [(kw-str [v]
+          (cond (string? v) v
+                (keyword? v) (name v)))]
+  (extend-type java.sql.Connection
+    Conn
+    (prepare [c sql]
+      (j/prepare-statement c sql))
+    (query
+      ([c q]
+       (j/query {:connection c} [q]))
+      ([c q bs]
+       (j/query {:connection c} (into [q] bs))))
+    (execute
+      ([c q]
+       (j/execute! {:connection c} [q] {:transaction? false}))
+      ([c q bs]
+       (j/execute! {:connection c} (into [q] bs) {:transaction? false})))
+    (savepoint [c name]
+      (execute c (str "savepoint " (kw-str name))))
+    (rollback [c name]
+      (execute c (str "rollback to " (kw-str name))))))
+
+(defmacro with-conn
+  "[macro] Executes code within the scope of a connection to the database
+   args: [[name pool] & exprs]
+     name: symbol to bind the connection to in the scope
+     pool: pool as returned from make-pool
+     writability: one of :ro, :rw. Whether to lock for read only"
+  [[name pool] & exprs]
+  `(let [~name (get-conn ~pool)]
+     (try ~@exprs
+       (finally (.close ~name)))))
+
+(defmacro with-prep
+  "[macro] Executes exprs in the context of one or more queries which will be prepared and then closed after the scope closes
+   args: [conn query-bindings & exprs]
+     query-bindings: 'assignment vector' of symbol to sql string
+                     each symbol will be bound to a PreparedStatement"
+  [conn names & exprs]
+  (when (not= 0 (mod (count names) 2))
+    (throw (ex-info "with-prepared assignment vector is uneven" {})))
+  (let [parts (partition 2 names)]
+    `(let ~(vec (mapcat (fn [[name sql]] [name `(prepare ~conn ~sql)]) parts))
+       (try ~@exprs
+            (finally ~@(map (comp (partial list '.close) first) parts))))))
+
 (defn transact
   "Executes a given function within a transaction
-   args: [conn isolation read-only? func]
+   args: [conn lock-mode isolation lock-mode func]
      conn: a connection as obtained through with-conn
+     lock-mode: one of :ro, :rw. Whether to lock for read only
      isolation: one of :none, :read-uncommitted, :read-committed,
-                       :repeatable-read, :serializable
-     read-only?: boolean"
- [conn isolation read-only? func]
-  (when-not (isolations isolation)
-    (throw (ex-info (str "transact: invalid isolation: " isolation)
-                    {:got isolation  :valid isolations})))
-  (j/db-transaction* conn func {:isolation isolation  :read-only? read-only?}))
+                       :repeatable-read, :serializable"
+  [conn lock-mode isolation func]
+  (let [read-only? (case lock-mode :ro true :rw false)]
+    (when-not (isolations isolation)
+      (-> (str "transact: invalid isolation: " isolation)
+          (ex-info {:got isolation :valid isolations}) throw))
+    (j/db-transaction* {:datasource conn} func {:isolation isolation  :read-only? read-only?})))
 
-(defmacro in-transaction
-  "[macro] Executes code within a transaction
-   args: [conn isolation roness & exprs]
+(defmacro with-transaction
+  "[macro] Executes code within a transaction, which auto commits at end
+           unless of scope unless an exception is thrown (which rolls
+           back the transaction and rethrows the exception)
+   args: [conn isolation lock-mode & exprs]
      conn: a connection as obtained through with-conn
+     lock-mode: one of :ro, :rw. Whether to lock for read only
      isolation: one of :none, :read-uncommitted, :read-committed,
-                       :repeatable-read, :serializable
-     writability: one of :ro, :rw. Whether to lock for read only"
-  [conn isolation roness & exprs]
-  `(transact ~conn ~isolation ~(case roness :ro true :rw false)
-     (fn [~'_] ~@exprs)))
+                       :repeatable-read, :serializable"
+  [lock-mode isolation [name pool] & exprs]
+  `(transact ~pool ~lock-mode ~isolation
+     (fn [{:keys [~'connection]}]
+       (let [~name ~'connection]
+         ~@exprs))))
+

@@ -2,57 +2,51 @@ The irresponsible clojure guild presents...
 
 # utrecht
 
-Modern postgres made easy
+Just enough rope to wrangle a jdbc.
 
-## What is it?
+A modern, minimalist database library with an emphasis on correctness,
+stability and performance. We provide a connection pool and a small
+library that make it easy to work with Postgres.
 
-Just enough of a shim to pull together database pooling
-([HikariCP](https://github.com/brettwooldridge/hikaricp/), conversion
-between clojure/java and postgres datatypes
-([mpg](https://github.com/ShaneKilKelly/mpg/)) and to make it easy to
-work with transactions correctly.
+## Features
 
-## Platform Support
-
-This module requires JDK 8. Please upgrade to JDK 8 to improve
-security and performance of your applications.
-
-This module depends on the latest version of the postgres driver at
-time of release. You should be able to use it with any non-ancient
-version of postgres.
-
-Note that we have explicitly provided full support for prepared
-statements. Prepared statements allows the parser and planner to run
-once ahead of time and swap in values as required. They're useful if
-you wish to execute one particular query many times in
-succession. With that, there is a caveat. Some optimisations are not
-performed against prepared queries because the actual values required
-are needed to perform them. That will include partial indexes where
-you don't provide an explicit value for that column.
+* HikariCP database pool
+* Simple api
+* Support for transactions (all isolations) and prepared queries
+* Optional 'component' interface
 
 ## Usage
 
+This module requires JDK 8. Please upgrade to JDK 8 to improve
+the security and performance of your applications.
+
 ```
 (ns my.db
- (:require [irresponsible.utrecht :as u]))
+ (:require [irresponsible.utrecht :as u])
+ (:import  [clojure.lang ExceptionInfo]))
 
-(u/setup!) ;; install the inflation/deflation hooks
 (def pool (u/make-pool hikari-pool-opts))
-;; Several ways of doing the same thing
 (def bars (u/with-conn [conn pool]
             (u/with-prep [q "select * from foo where bar = ?"]
-              (u/query conn q ["bar"])))
-(def bazs (u/with-conn [conn pool] ; execute unprepared
-             (u/run conn "SELECT * FROM foo WHERE bar = ?" ["baz"])))
-;; just execute some sql against a pool
-(def quuxs (u/q pool "SELECT * FROM foo WHERE bar = ?" ["quux"]))
-
-;; 
+              (u/query conn q ["bar"]))) ; query can also take a sql string
+(def quuxs (try ; with-transaction binds a connection like with-conn
+              (u/with-transaction :ro :serializable [conn pool]
+                (u/savepoint conn :sp1) ; savepoints!
+                (let [r (u/query conn "select 'foo' as result")]
+                  (u/rollback :sp1) ; rolling back to savepoints!
+                  (throw (ex-info "throw to rollback the entire transaction" {:result r}))))
+              (catch ExceptionInfo e ; yes, your exception is rethrown
+                (:result (ex-data e)))))
 
 ;; During shutdown you'll want to close the pool
 (.close pool)
-
 ```
+
+## Recommendations
+
+We highly recommend using this module in conjunction with a recent
+postgres and [mpg](https://github.com/ShaneKilkelly/mpg) which
+provides transparent conversion between pg and clojure data types.
 
 ## Copyright and License
 
