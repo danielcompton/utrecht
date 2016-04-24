@@ -1,7 +1,10 @@
 (ns irresponsible.utrecht-test
   (:use [clojure.test])
   (:require [irresponsible.utrecht :as u]
+            [irresponsible.utrecht.component :as c]
             [irresponsible.utrecht.pool.hikaricp :refer [hikaricp]]
+            [com.stuartsierra.component :refer [start stop]]
+
             [environ.core :refer [env]])
   (:import [java.sql PreparedStatement]
            [clojure.lang ExceptionInfo]))
@@ -49,3 +52,26 @@
          (catch ExceptionInfo e
            (is (= {:error :yup} (ex-data e)))))
     (.close pool)))
+
+(deftest cpt
+  (let [pool (start (c/utrecht config))]
+    (is (satisfies? u/Pool pool))
+    (u/with-conn [c pool]
+      (is (satisfies? u/Conn c))
+      (is (satisfies? u/Conn c))
+      (u/with-prep c [p "select 'foo' as result"]
+        (is (instance? PreparedStatement p))
+        (is (= '({:result "foo"})
+               (u/query c p)
+               (u/query c "select 'foo' as result")))
+        (is (= [0] (u/execute c "create temporary table foo()")))))
+    (try (u/with-transaction :ro :serializable [c pool]
+           (is (= [0] (u/savepoint c :sp1)))
+           (is (= '({:result "foo"})
+             (u/query c "select 'foo' as result")))
+           (is (= [0] (u/rollback c :sp1)))
+           (throw (ex-info "" {:error :yup})))
+         (catch ExceptionInfo e
+           (is (= {:error :yup} (ex-data e)))))
+    (stop pool)))
+    

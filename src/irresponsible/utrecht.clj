@@ -13,7 +13,13 @@
     "Gets a connection from the pool. Is assumed to be Closeable.
      args: [pool]
      returns: Conn
-     throws: if we cannot obtain a connection"))
+     throws: if we cannot obtain a connection")
+  (transact [pool lock-mode isolation func]
+   "Executes a given function within a transaction
+    args: [pool lock-mode isolation lock-mode func]
+      lock-mode: one of :ro, :rw. Whether to lock for read only
+      isolation: one of :none, :read-uncommitted, :read-committed,
+                        :repeatable-read, :serializable"))
 
 (defprotocol Conn
   (prepare [c q]
@@ -86,20 +92,6 @@
        (try ~@exprs
             (finally ~@(map (comp (partial list '.close) first) parts))))))
 
-(defn transact
-  "Executes a given function within a transaction
-   args: [conn lock-mode isolation lock-mode func]
-     conn: a connection as obtained through with-conn
-     lock-mode: one of :ro, :rw. Whether to lock for read only
-     isolation: one of :none, :read-uncommitted, :read-committed,
-                       :repeatable-read, :serializable"
-  [conn lock-mode isolation func]
-  (let [read-only? (case lock-mode :ro true :rw false)]
-    (when-not (isolations isolation)
-      (-> (str "transact: invalid isolation: " isolation)
-          (ex-info {:got isolation :valid isolations}) throw))
-    (j/db-transaction* {:datasource conn} func {:isolation isolation  :read-only? read-only?})))
-
 (defmacro with-transaction
   "[macro] Executes code within a transaction, which auto commits at end
            unless of scope unless an exception is thrown (which rolls
@@ -114,4 +106,3 @@
      (fn [{:keys [~'connection]}]
        (let [~name ~'connection]
          ~@exprs))))
-

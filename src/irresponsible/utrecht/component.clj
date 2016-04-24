@@ -1,31 +1,31 @@
 (ns irresponsible.utrecht.component
-  (:require [com.stuartsierra.component :refer [Lifecycle start stop]]
+  (:require [irresponsible.utrecht :as u]
+            [irresponsible.utrecht.pool.hikaricp :refer [hikaricp]]
+            [com.stuartsierra.component :refer [Lifecycle start stop]]
             [suspendable.core :refer [Suspendable]]))
 
-(defn destate [c]
-  (reduce dissoc c (:-state c)))
-
 (defrecord Utrecht
-    [-server -starter]
+  [-pool]
   Lifecycle
   (start [self]
-    (if -server  self
-      (->> (-starter (destate self))
-           (assoc-in self :-server))))
+    (if -pool self
+      (->> (hikaricp (dissoc self :-pool))
+           (assoc self :-pool))))
   (stop [self]
-    (when -server
-      (.stop -server))
-    (dissoc self :server))
+    (when -pool
+      (.close -pool))
+    (dissoc self :-pool))
   Suspendable
   (suspend [self] self)
   (resume [self old]
-    (if (= (destate self) (destate old))
-      (assoc self :-server (:-server old))
+    (if (= (dissoc self :-pool) (dissoc old :-pool))
+      (assoc self :-pool (:-pool old))
       (do (stop old)
-          (start self)))))
+          (start self))))
+  u/Pool
+  (get-conn [self]
+    (u/get-conn -pool))
+  (transact [self lock-mode isolation func]
+    (u/transact -pool lock-mode isolation func)))
 
-(defn utrecht
-  [conf]
-  (->> {:-state [:-server :-starter]}
-       (merge conf)
-       map->Utrecht))
+(def utrecht map->Utrecht)

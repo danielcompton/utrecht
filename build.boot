@@ -8,10 +8,9 @@
                   [cheshire                  "5.6.1"]
                   [hikari-cp                 "1.6.1"]
                   [clojure.java-time         "0.2.0"]
-                  ;; don't force the user to use component
-                  [com.stuartsierra/component "0.3.1" :scope "provided"]
-                  [suspendable "0.1.1"                :scope "provided"]
-                  ;; build and test
+                  ;; don't force the user to pull in any of these
+                  [com.stuartsierra/component "0.3.1"   :scope "test"]
+                  [suspendable "0.1.1"                  :scope "test"]
                   [org.postgresql/postgresql "9.4.1208" :scope "test"]
                   [environ "1.0.2"                      :scope "test"]
                   [adzerk/boot-test          "1.1.0"    :scope "test"]])
