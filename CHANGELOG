@@ -1,7 +1,7 @@
 Changelog for utrecht
 ---------------------
 
-0.2.0
+0.2.0 2016-04-28 57c57c3257bcc07127ae2ef0c2efff4e6627cf94
 - Documentation slightly improved
 - Dependency requirements now more flexible.
 - New protocols "Pool" and "Conn" to replace top level functions.
