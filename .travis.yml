@@ -15,3 +15,5 @@ jdk:
 install:
   - curl -fsSLo boot https://github.com/boot-clj/boot-bin/releases/download/latest/boot.sh
   - chmod 755 boot
+  - ./boot installdeps
+  - ./boot show -d

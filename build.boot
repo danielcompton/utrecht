@@ -42,3 +42,6 @@
 (deftask travis []
   (testing)
   (t/test))
+
+(deftask installdeps []
+  identity)
