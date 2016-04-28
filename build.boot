@@ -30,10 +30,10 @@
   identity)
 
 (deftask test []
-  (comp (testing) (speak) (t/test)))
+  (comp (testing) (t/test)))
 
 (deftask autotest []
-  (comp (testing) (watch) (speak) (t/test)))
+  (comp (testing) (watch) (t/test)))
 
 (deftask make-release-jar []
   (comp (pom) (jar)))
