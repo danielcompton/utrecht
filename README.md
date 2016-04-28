@@ -49,7 +49,7 @@ the security and performance of your applications.
 ## Recommendations
 
 We highly recommend using this module in conjunction with a recent
-postgres and [mpg](https://github.com/ShaneKilkelly/mpg) which
+postgres and [mpg](https://github.com/mpg-project/mpg) which
 provides transparent conversion between pg and clojure data types.
 
 ## Hacking
