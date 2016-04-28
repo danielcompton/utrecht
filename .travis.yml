@@ -5,6 +5,12 @@ branches:
   only:
     - master
     - kentnl
+env:
+  - UTRECHT_TEST_DB="utrecht_test"
+services:
+  - postgresql
+before_script:
+  - psql -c 'create database utrecht_test;' -U postgres
 jdk:
   - oraclejdk8
 #  - openjdk7 # tests fail - probably running out of memory or disk
