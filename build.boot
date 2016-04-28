@@ -1,7 +1,7 @@
 ; vim: syntax=clojure ts=2 sw=2 et
 (set-env!
  :project 'irresponsible/utrecht
-  :version "0.2.0"
+  :version "0.2.1"
   :resource-paths #{"src"}
   :source-paths #{"src"}
   :dependencies '[[org.clojure/clojure       "1.8.0" :scope "provided"]
