@@ -1,0 +1,12 @@
+Changelog for utrecht
+---------------------
+
+0.2.0
+- Documentation slightly improved
+- Dependency requirements now more flexible.
+- New protocols "Pool" and "Conn" to replace top level functions.
+- Pool implementations for HikariDataSource and new utrecht.component to wrap the Pool.
+- Conn implementations added to java.sql.Connection
+
+0.1.0 (unpublished) 2016-04-21 cc6f702b056043bc4dda3c3a4e13948da3c5ac9f
+- Initial Version
