@@ -4,6 +4,7 @@ script: ./boot travis
 branches:
   only:
     - master
+    - kentnl
 jdk:
   - oraclejdk8
 #  - openjdk7 # tests fail - probably running out of memory or disk

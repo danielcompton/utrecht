@@ -1,3 +1,4 @@
+; vim: syntax=clojure ts=2 sw=2 et
 (set-env!
  :project 'irresponsible/utrecht
   :version "0.2.0"
@@ -37,3 +38,7 @@
 
 (deftask make-release-jar []
   (comp (pom) (jar)))
+
+(deftask travis []
+  (testing)
+  (t/test))
