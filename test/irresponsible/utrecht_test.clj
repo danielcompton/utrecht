@@ -1,3 +1,14 @@
+; CONFIGURATION
+;
+; This test needs UTRECHT_TEST_DB set to a disposable postgresql database
+; to perform queries against.
+;
+; UTRECHT_TEST_HOST can be set to a server address (default: 127.0.0.1)
+; UTRECHT_TEST_CONN_TIMEOUT can be set to the login wait time (default: 5000 (in milliseconds))
+; UTRECHT_TEST_USER can be set to a username (default: empty)
+; UTRECHT_TEST_PASS can be set to a password (default: empty)
+; UTRECHT_TEST_PORT can be set to a port (default: 5432)
+
 (ns irresponsible.utrecht-test
   (:use [clojure.test])
   (:require [irresponsible.utrecht :as u]
@@ -12,7 +23,6 @@
   {:adapter "postgresql"
    :server-name "127.0.0.1"
    :port-number 5432
-   :database-name "utrecht_test"
    :connection-timeout 5000})
 
 (def config
@@ -30,6 +40,11 @@
       utp  (assoc :password utp)
       utp2 (assoc :port-number (Integer/parseInt utp2)))))
 
+(if (not (contains? config :database-name))
+  (println "* Tests Skipped, UTRECHT_TEST_DB must be configured to a test Posgresql database")
+  (do
+
+(apply printf "* Testing vs %s:%s/%s\n" (map config [:server-name :port-number :database-name]))
 (deftest utrecht
   (let [pool (hikaricp config)]
     (is (satisfies? u/Pool pool))
@@ -74,3 +89,4 @@
            (is (= {:error :yup} (ex-data e)))))
     (stop pool)))
     
+))
