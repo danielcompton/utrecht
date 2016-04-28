@@ -20,7 +20,7 @@ library that make it easy to work with Postgres.
 This module requires JDK 8. Please upgrade to JDK 8 to improve
 the security and performance of your applications.
 
-```
+```clojure
 (ns my.db
  (:require [irresponsible.utrecht :as u])
  (:import  [clojure.lang ExceptionInfo]))
