@@ -4,7 +4,6 @@
             [irresponsible.utrecht.component :as c]
             [irresponsible.utrecht.pool.hikaricp :refer [hikaricp]]
             [com.stuartsierra.component :refer [start stop]]
-
             [environ.core :refer [env]])
   (:import [java.sql PreparedStatement]
            [clojure.lang ExceptionInfo]))

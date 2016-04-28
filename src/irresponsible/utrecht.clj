@@ -52,21 +52,21 @@
   (extend-type java.sql.Connection
     Conn
     (prepare [c sql]
-      (j/prepare-statement c sql))
+      (io! (j/prepare-statement c sql)))
     (query
       ([c q]
-       (j/query {:connection c} [q]))
+       (io! (j/query {:connection c} [q])))
       ([c q bs]
-       (j/query {:connection c} (into [q] bs))))
+       (io! (j/query {:connection c} (into [q] bs)))))
     (execute
       ([c q]
-       (j/execute! {:connection c} [q] {:transaction? false}))
+       (io! (j/execute! {:connection c} [q] {:transaction? false})))
       ([c q bs]
-       (j/execute! {:connection c} (into [q] bs) {:transaction? false})))
+       (io! (j/execute! {:connection c} (into [q] bs) {:transaction? false}))))
     (savepoint [c name]
-      (execute c (str "savepoint " (kw-str name))))
+      (io! (execute c (str "savepoint " (kw-str name)))))
     (rollback [c name]
-      (execute c (str "rollback to " (kw-str name))))))
+      (io! (execute c (str "rollback to " (kw-str name)))))))
 
 (defmacro with-conn
   "[macro] Executes code within the scope of a connection to the database
@@ -75,9 +75,9 @@
      pool: pool as returned from make-pool
      writability: one of :ro, :rw. Whether to lock for read only"
   [[name pool] & exprs]
-  `(let [~name (get-conn ~pool)]
-     (try ~@exprs
-       (finally (.close ~name)))))
+  `(io! (let [~name (get-conn ~pool)]
+          (try ~@exprs
+               (finally (.close ~name))))))
 
 (defmacro with-prep
   "[macro] Executes exprs in the context of one or more queries which will be prepared and then closed after the scope closes
@@ -88,9 +88,9 @@
   (when (not= 0 (mod (count names) 2))
     (throw (ex-info "with-prepared assignment vector is uneven" {})))
   (let [parts (partition 2 names)]
-    `(let ~(vec (mapcat (fn [[name sql]] [name `(prepare ~conn ~sql)]) parts))
-       (try ~@exprs
-            (finally ~@(map (comp (partial list '.close) first) parts))))))
+    `(io! (let ~(vec (mapcat (fn [[name sql]] [name `(prepare ~conn ~sql)]) parts))
+            (try ~@exprs
+                 (finally ~@(map (comp (partial list '.close) first) parts)))))))
 
 (defmacro with-transaction
   "[macro] Executes code within a transaction, which auto commits at end

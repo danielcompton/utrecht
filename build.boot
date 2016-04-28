@@ -5,9 +5,7 @@
   :source-paths #{"src"}
   :dependencies '[[org.clojure/clojure       "1.8.0" :scope "provided"]
                   [org.clojure/java.jdbc     "0.6.0-alpha2"]
-                  [cheshire                  "5.6.1"]
                   [hikari-cp                 "1.6.1"]
-                  [clojure.java-time         "0.2.0"]
                   ;; don't force the user to pull in any of these
                   [com.stuartsierra/component "0.3.1"   :scope "test"]
                   [suspendable "0.1.1"                  :scope "test"]
