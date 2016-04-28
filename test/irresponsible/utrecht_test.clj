@@ -44,49 +44,49 @@
   (println "* Tests Skipped, UTRECHT_TEST_DB must be configured to a test Posgresql database")
   (do
 
-(apply printf "* Testing vs %s:%s/%s\n" (map config [:server-name :port-number :database-name]))
-(deftest utrecht
-  (let [pool (hikaricp config)]
-    (is (satisfies? u/Pool pool))
-    (u/with-conn [c pool]
-      (is (satisfies? u/Conn c))
-      (is (satisfies? u/Conn c))
-      (u/with-prep c [p "select 'foo' as result"]
-        (is (instance? PreparedStatement p))
-        (is (= '({:result "foo"})
-               (u/query c p)
-               (u/query c "select 'foo' as result")))
-        (is (= [0] (u/execute c "create temporary table foo()")))))
-    (try (u/with-transaction :ro :serializable [c pool]
-           (is (= [0] (u/savepoint c :sp1)))
-           (is (= '({:result "foo"})
-             (u/query c "select 'foo' as result")))
-           (is (= [0] (u/rollback c :sp1)))
-           (throw (ex-info "" {:error :yup})))
-         (catch ExceptionInfo e
-           (is (= {:error :yup} (ex-data e)))))
-    (.close pool)))
+    (apply printf "* Testing vs %s:%s/%s\n" (map config [:server-name :port-number :database-name]))
+    (deftest utrecht
+      (let [pool (hikaricp config)]
+        (is (satisfies? u/Pool pool))
+        (u/with-conn [c pool]
+          (is (satisfies? u/Conn c))
+          (is (satisfies? u/Conn c))
+          (u/with-prep c [p "select 'foo' as result"]
+            (is (instance? PreparedStatement p))
+            (is (= '({:result "foo"})
+                   (u/query c p)
+                   (u/query c "select 'foo' as result")))
+            (is (= [0] (u/execute c "create temporary table foo()")))))
+        (try (u/with-transaction :ro :serializable [c pool]
+               (is (= [0] (u/savepoint c :sp1)))
+               (is (= '({:result "foo"})
+                 (u/query c "select 'foo' as result")))
+               (is (= [0] (u/rollback c :sp1)))
+               (throw (ex-info "" {:error :yup})))
+             (catch ExceptionInfo e
+               (is (= {:error :yup} (ex-data e)))))
+        (.close pool)))
 
-(deftest cpt
-  (let [pool (start (c/utrecht config))]
-    (is (satisfies? u/Pool pool))
-    (u/with-conn [c pool]
-      (is (satisfies? u/Conn c))
-      (is (satisfies? u/Conn c))
-      (u/with-prep c [p "select 'foo' as result"]
-        (is (instance? PreparedStatement p))
-        (is (= '({:result "foo"})
-               (u/query c p)
-               (u/query c "select 'foo' as result")))
-        (is (= [0] (u/execute c "create temporary table foo()")))))
-    (try (u/with-transaction :ro :serializable [c pool]
-           (is (= [0] (u/savepoint c :sp1)))
-           (is (= '({:result "foo"})
-             (u/query c "select 'foo' as result")))
-           (is (= [0] (u/rollback c :sp1)))
-           (throw (ex-info "" {:error :yup})))
-         (catch ExceptionInfo e
-           (is (= {:error :yup} (ex-data e)))))
-    (stop pool)))
-    
+    (deftest cpt
+      (let [pool (start (c/utrecht config))]
+        (is (satisfies? u/Pool pool))
+        (u/with-conn [c pool]
+          (is (satisfies? u/Conn c))
+          (is (satisfies? u/Conn c))
+          (u/with-prep c [p "select 'foo' as result"]
+            (is (instance? PreparedStatement p))
+            (is (= '({:result "foo"})
+                   (u/query c p)
+                   (u/query c "select 'foo' as result")))
+            (is (= [0] (u/execute c "create temporary table foo()")))))
+        (try (u/with-transaction :ro :serializable [c pool]
+               (is (= [0] (u/savepoint c :sp1)))
+               (is (= '({:result "foo"})
+                 (u/query c "select 'foo' as result")))
+               (is (= [0] (u/rollback c :sp1)))
+               (throw (ex-info "" {:error :yup})))
+             (catch ExceptionInfo e
+               (is (= {:error :yup} (ex-data e)))))
+        (stop pool)))
+
 ))
