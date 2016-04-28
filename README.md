@@ -48,6 +48,32 @@ We highly recommend using this module in conjunction with a recent
 postgres and [mpg](https://github.com/ShaneKilkelly/mpg) which
 provides transparent conversion between pg and clojure data types.
 
+## Hacking
+
+### Running Tests
+
+Testing requires a configured **PostgreSQL** database to perform tests against,
+and requires expressing that configuration by use of *environment variables*.
+
+Very basic usage is as simple as
+
+```shell
+UTRECHT_TEST_DB="utrecht_test" boot test
+```
+
+Which will execute tests against an assumed **PostgreSQL** server running locally on the default ports
+without any specific authentication requirements.
+
+If these defaults are not to your liking, the following *environment variables* are settable:
+
+```shell
+UTRECHT_TEST_HOST="127.0.0.1"
+UTRECHT_TEST_CONN_TIMEOUT="5000" # milliseconds
+UTRECHT_TEST_USER=""
+UTRECHT_TEST_PASS=""
+UTRECHT_TEST_PORT="5432"
+```
+
 ## Copyright and License
 
 Copyright (c) 2016 James Laver
