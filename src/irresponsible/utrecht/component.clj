@@ -8,12 +8,12 @@
   [-pool]
   Lifecycle
   (start [self]
-    (if -pool self
+    (if -pool
+      self
       (->> (hikaricp (dissoc self :-pool))
-           (assoc self :-pool))))
+           (assoc self :-pool))
   (stop [self]
-    (when -pool
-      (.close -pool))
+    (when -pool (.close -pool))
     (dissoc self :-pool))
   Suspendable
   (suspend [self] self)

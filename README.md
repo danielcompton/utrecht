@@ -6,7 +6,7 @@ Just enough rope to wrangle a jdbc.
 
 A modern, minimalist database library with an emphasis on correctness,
 stability and performance. We provide a connection pool and a small
-library that make it easy to work with Postgres.
+library that makes it easy to work with Postgres.
 
 [![Clojars Project](https://img.shields.io/clojars/v/irresponsible/utrecht.svg)](https://clojars.org/irresponsible/utrecht)
 
@@ -17,7 +17,7 @@ library that make it easy to work with Postgres.
 * HikariCP database pool
 * Simple api
 * Support for transactions (all isolations) and prepared queries
-* Optional 'component' interface
+* Optional interfaces for 'component' and 'codependent'
 
 ## Usage
 
@@ -51,6 +51,10 @@ the security and performance of your applications.
 We highly recommend using this module in conjunction with a recent
 postgres and [mpg](https://github.com/mpg-project/mpg) which
 provides transparent conversion between pg and clojure data types.
+
+We additionally recommend using the
+[codependent](https://github.com/irresponsible/codependent)
+support for structuring your app
 
 ## Hacking
 

@@ -10,6 +10,7 @@
                   ;; don't force the user to pull in any of these
                   [com.stuartsierra/component "0.3.1"   :scope "test"]
                   [suspendable "0.1.1"                  :scope "test"]
+                  [irresponsible/codependent "0.1.0"    :scope "test"]
                   [org.postgresql/postgresql "9.4.1208" :scope "test"]
                   [environ "1.0.2"                      :scope "test"]
                   [adzerk/boot-test          "1.1.0"    :scope "test"]])
