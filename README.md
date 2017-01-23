@@ -17,7 +17,7 @@ library that makes it easy to work with Postgres.
 * HikariCP database pool
 * Simple api
 * Support for transactions (all isolations) and prepared queries
-* Optional interfaces for 'component' and 'codependent'
+* Optional interfaces for 'component' and 'codependence
 
 ## Usage
 
@@ -53,7 +53,7 @@ postgres and [mpg](https://github.com/mpg-project/mpg) which
 provides transparent conversion between pg and clojure data types.
 
 We additionally recommend using the
-[codependent](https://github.com/irresponsible/codependent)
+[codependence](https://github.com/irresponsible/codependence)
 support for structuring your app
 
 ## Hacking

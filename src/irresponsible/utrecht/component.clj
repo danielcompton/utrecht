@@ -11,7 +11,7 @@
     (if -pool
       self
       (->> (hikaricp (dissoc self :-pool))
-           (assoc self :-pool))
+           (assoc self :-pool))))
   (stop [self]
     (when -pool (.close -pool))
     (dissoc self :-pool))
