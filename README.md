@@ -19,6 +19,8 @@ library that makes it easy to work with Postgres.
 * Support for transactions (all isolations) and prepared queries
 * Optional interfaces for 'component' and 'codependence
 
+Note that while this should in theory work against any sane RDBMS, we only test against postgres. Patches welcome.
+
 ## Usage
 
 This module requires JDK 8. Please upgrade to JDK 8 to improve
@@ -29,6 +31,8 @@ the security and performance of your applications.
  (:require [irresponsible.utrecht :as u])
  (:import  [clojure.lang ExceptionInfo]))
 
+(def opts {:adapter "pgsql"}) ;; we can use pgjdbc-ng (which you should!)
+;; All options are documented in the [hikari-cp](https://github.com/tomekw/hikari-cp) README
 (def pool (u/make-pool hikari-pool-opts))
 (def bars (u/with-conn [conn pool]
             (u/with-prep [q "select * from foo where bar = ?"]
