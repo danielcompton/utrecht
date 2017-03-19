@@ -40,9 +40,13 @@
 (deftask make-release-jar []
   (comp (pom) (jar)))
 
+(deftask installdeps []
+  identity)
+
+;; Release Manager
+(deftask travis-installdeps []
+  identity)
+
 (deftask travis []
   (testing)
   (t/test))
-
-(deftask installdeps []
-  identity)
