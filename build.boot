@@ -50,3 +50,14 @@
 (deftask travis []
   (testing)
   (t/test))
+
+(deftask jitpak-deploy []
+  (task-options! pom {
+    :project (symbol (System/getenv "ARTIFACT"))
+  })
+  (comp
+    (pom)
+    (jar)
+    (target)      ; Must install to build dir
+    (install)     ; And to .m2 https://jitpack.io/docs/BUILDING/#build-customization
+  ))
