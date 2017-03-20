@@ -2,7 +2,7 @@
 (set-env!
  :project 'irresponsible/utrecht
   :version "0.2.1"
-  :resource-paths #{"src"}
+  :resource-paths #{"src" "resources"}
   :source-paths #{"src"}
   :dependencies '[[org.clojure/clojure       "1.9.0-alpha15" :scope "provided"]
                   [org.clojure/java.jdbc     "0.7.0-alpha2"]
