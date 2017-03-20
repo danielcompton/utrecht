@@ -47,6 +47,15 @@
 (deftask travis-installdeps []
   identity)
 
+(deftask make-jar []
+  (comp (pom) (jar) (target)))
+
+(deftask install-jar []
+  (comp (pom) (jar) (install)))
+
+(deftask release []
+  (comp (pom) (jar) (push)))
+
 (deftask travis []
   (testing)
   (t/test))
