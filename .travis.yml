@@ -10,8 +10,6 @@ cache:
   directories:
     - $HOME/.m2
     - $HOME/.boot
-    - $HOME/boot
-    - $HOME/zulu
 matrix:
   include:
     - env: JDK=zulu8 UTRECHT_TEST_DB="utrecht_test"
