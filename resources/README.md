@@ -34,7 +34,7 @@ the security and performance of your applications.
 
 (def opts {:adapter "pgsql"}) ;; we can use pgjdbc-ng (which you should!)
 ;; All options are documented in the [hikari-cp](https://github.com/tomekw/hikari-cp) README
-(def pool (u/hikaricp hikari-pool-opts))
+(def pool (hikaricp hikari-pool-opts))
 (def bars (u/with-conn [conn pool]
             (u/with-prep [q "select * from foo where bar = ?"]
               (u/query conn q ["bar"]))) ; query can also take a sql string
