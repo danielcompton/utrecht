@@ -5,10 +5,7 @@
   (:import [com.zaxxer.hikari HikariDataSource]))
 
 (def default-config
-  {:auto-commit false
-   :adapter "postgresql" ; safe default
-   :port-number 5432
-   :server-name "127.0.0.1"})
+  {:auto-commit false :adapter "postgresql"})
 
 (defn hikaricp
   "Given a HikariCP configuration map, creates a pool
