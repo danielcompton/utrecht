@@ -26,10 +26,11 @@ Note that while this should in theory work against any sane RDBMS, we only test 
 
 ```clojure
 (ns my.db
- (:require [irresponsible.utrecht :as u])
+ (:require [irresponsible.utrecht :as u]
+           [irresponsible.utrecht.pool.hikaricp :refer [hikaricp]])
  (:import  [clojure.lang ExceptionInfo]))
 
-(def pool (u/make-pool {:server-name "127.0.0.1" :username "foo" :password "bar"}))
+(def pool (hikaricp {:server-name "127.0.0.1" :username "foo" :password "bar"}))
 (def bars (u/with-conn [conn pool]
             (u/with-prep [q "select * from foo where bar = ?"]
               (u/query conn q ["bar"]))) ; query can also take a sql string
@@ -52,11 +53,11 @@ If you use pgjdbc-ng, it unhelpfully chooses different property names from the p
 
 ## Recommendations
 
-We highly recommend using this module in conjunction with a recent
-postgres and [mpg](https://github.com/mpg-project/mpg) which
-provides transparent conversion between pg and clojure data types.
+Goes nicely with:
 
-We additionally recommend using with [codependence](https://github.com/irresponsible/codependence)
+* A recent version of postgres
+* [mpg](https://github.com/mpg-project/mpg)
+* [codependence](https://github.com/irresponsible/codependence)
 
 ## Hacking
 
