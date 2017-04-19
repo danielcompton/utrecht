@@ -68,9 +68,7 @@
       (io! (.setSavepoint c (kw-str name))))
     (rollback [^Connection c sp]
       (io!
-       (if (instance? Savepoint sp)
-         (.rollback c ^Savepoint sp)
-         (.rollback c ^String (kw-str sp)))))))
+       (.rollback c ^Savepoint sp)))))
 
 (defmacro with-conn
   "[macro] Executes code within the scope of a connection to the database
