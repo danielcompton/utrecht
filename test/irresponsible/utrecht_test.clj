@@ -19,11 +19,12 @@
   (:import [java.sql PreparedStatement Savepoint]
            [clojure.lang ExceptionInfo]))
 
-(def default-config
+(def defaults
+  {:postgres
   {:adapter "postgresql"
    :server-name "127.0.0.1"
    :port-number 5432
-   :connection-timeout 5000})
+   :connection-timeout 5000}})
 
 (def config
   (let [uth  (env :utrecht-test-host)
@@ -32,21 +33,22 @@
         utu  (env :utrecht-test-user)
         utp  (env :utrecht-test-pass)
         utp2 (env :utrecht-test-port)]
-    (cond-> default-config
+    {:postgres
+    (cond-> (:postgres defaults)
       uth  (assoc :server-name uth)
       utct (assoc :connection-timeout utct)
       utd  (assoc :database-name utd)
       utu  (assoc :username utu)
       utp  (assoc :password utp)
-      utp2 (assoc :port-number (Integer/parseInt utp2)))))
+      utp2 (assoc :port-number (Integer/parseInt utp2)))}))
 
-(if (not (contains? config :database-name))
+(if (not (contains? (:postgres config) :database-name))
   (println "* Tests Skipped, UTRECHT_TEST_DB must be configured to a test Posgresql database")
   (do
 
-    (apply printf "* Testing vs %s:%s/%s\n" (map config [:server-name :port-number :database-name]))
+    (apply printf "* Testing vs %s:%s/%s\n" (map (:postgres config) [:server-name :port-number :database-name]))
     (deftest utrecht
-      (let [pool (hikaricp config)]
+      (let [pool (hikaricp (:postgres config))]
         (is (satisfies? u/Pool pool))
         (u/with-conn [c pool]
           (is (satisfies? u/Conn c))
@@ -69,7 +71,7 @@
         (.close pool)))
 
     (deftest cpt
-      (let [pool (start (c/utrecht config))]
+      (let [pool (start (c/utrecht (:postgres config)))]
         (is (satisfies? u/Pool pool))
         (u/with-conn [c pool]
           (is (satisfies? u/Conn c))
