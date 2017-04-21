@@ -85,6 +85,16 @@ UTRECHT_TEST_PASS=""
 UTRECHT_TEST_PORT="5432"
 ```
 
+## Changelog
+
+0.3.0 - Unreleased
+ * Moved savepoints to using the proper jdbc APIs rather than executing sql directly
+   * Calling `savepoint` now returns a Savepoint object
+   * You must pass this savepoint into `rollback`
+ * Run tests against pgjdbc-ng as well as postgres jdbc
+ * Removed dependence on postgres driver. A user should bring their own
+ * We're now compatible back to Java 6 in theory. You should still use Java 8 like we test against.
+
 ## Copyright and License
 
 Copyright (c) 2016 James Laver
