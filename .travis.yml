@@ -1,6 +1,9 @@
 language: generic
 sudo: false
-script: boot-driver test
+script:
+  - export UTRECHT_TEST_DB="utrecht_test"
+  - export UTRECHT_TEST_USER=travis
+  - boot-driver test
 branches:
   only:
     - master
@@ -12,10 +15,10 @@ cache:
     - $HOME/.boot
 matrix:
   include:
-    - env: JDK=zulu8 UTRECHT_TEST_DB="utrecht_test"
-    - env: JDK=zulu9 UTRECHT_TEST_DB="utrecht_test"
+    - env: JDK=zulu8
+    - env: JDK=zulu9
   allow_failures:
-   - env: JDK=zulu9 UTRECHT_TEST_DB="utrecht_test"
+   - env: JDK=zulu9
 
 services:
   - postgresql
