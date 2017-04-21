@@ -1,5 +1,6 @@
 (ns irresponsible.utrecht
-  (:require [clojure.java.jdbc :as j]))
+  (:require [clojure.java.jdbc :as j])
+  (:import  [java.sql Connection Savepoint]))
 
 (def isolations
   #{:none            
@@ -49,24 +50,25 @@
 (letfn [(kw-str [v]
           (cond (string? v) v
                 (keyword? v) (name v)))]
-  (extend-type java.sql.Connection
+  (extend-type Connection
     Conn
     (prepare [c sql]
       (io! (j/prepare-statement c sql)))
     (query
-      ([c q]
+      ([^Connection c q]
        (io! (j/query {:connection c} [q])))
-      ([c q bs]
+      ([^Connection c q bs]
        (io! (j/query {:connection c} (into [q] bs)))))
     (execute
-      ([c q]
+      ([^Connection c q]
        (io! (j/execute! {:connection c} [q] {:transaction? false})))
-      ([c q bs]
+      ([^Connection c q bs]
        (io! (j/execute! {:connection c} (into [q] bs) {:transaction? false}))))
-    (savepoint [c name]
-      (io! (execute c (str "savepoint " (kw-str name)))))
-    (rollback [c name]
-      (io! (execute c (str "rollback to " (kw-str name)))))))
+    (savepoint [^Connection c name]
+      (io! (.setSavepoint c (kw-str name))))
+    (rollback [^Connection c sp]
+      (io!
+       (.rollback c ^Savepoint sp)))))
 
 (defmacro with-conn
   "[macro] Executes code within the scope of a connection to the database

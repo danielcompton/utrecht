@@ -16,7 +16,7 @@
             [irresponsible.utrecht.pool.hikaricp :refer [hikaricp]]
             [com.stuartsierra.component :refer [start stop]]
             [environ.core :refer [env]])
-  (:import [java.sql PreparedStatement]
+  (:import [java.sql PreparedStatement Savepoint]
            [clojure.lang ExceptionInfo]))
 
 (def default-config
@@ -58,10 +58,11 @@
                    (u/query c "select 'foo' as result")))
             (is (= [0] (u/execute c "create temporary table foo()")))))
         (try (u/with-transaction :ro :serializable [c pool]
-               (is (= [0] (u/savepoint c :sp1)))
+            (let [sp1 (u/savepoint c :sp1)]
+               (is (instance? Savepoint sp1))
                (is (= '({:result "foo"})
                  (u/query c "select 'foo' as result")))
-               (is (= [0] (u/rollback c :sp1)))
+               (is (nil? (u/rollback c sp1))))
                (throw (ex-info "" {:error :yup})))
              (catch ExceptionInfo e
                (is (= {:error :yup} (ex-data e)))))
@@ -80,10 +81,11 @@
                    (u/query c "select 'foo' as result")))
             (is (= [0] (u/execute c "create temporary table foo()")))))
         (try (u/with-transaction :ro :serializable [c pool]
-               (is (= [0] (u/savepoint c :sp1)))
+            (let [sp1 (u/savepoint c :sp1)]
+               (is (instance? Savepoint sp1))
                (is (= '({:result "foo"})
                  (u/query c "select 'foo' as result")))
-               (is (= [0] (u/rollback c :sp1)))
+               (is (nil? (u/rollback c sp1))))
                (throw (ex-info "" {:error :yup})))
              (catch ExceptionInfo e
                (is (= {:error :yup} (ex-data e)))))
