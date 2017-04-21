@@ -12,6 +12,7 @@
                   [suspendable "0.1.1"                  :scope "test"]
                   [irresponsible/codependence "0.1.0"   :scope "test"]
                   [org.postgresql/postgresql "42.0.0.jre7" :scope "test"]
+                  [com.impossibl.pgjdbc-ng/pgjdbc-ng "0.7.1" :scope "test"]
                   [environ "1.0.2"                      :scope "test"]
                   [adzerk/boot-test          "1.2.0"    :scope "test"]])
                   
