@@ -4,9 +4,6 @@ script:
   - export UTRECHT_TEST_DB="utrecht_test"
   - export UTRECHT_TEST_USER=travis
   - boot-driver test
-branches:
-  only:
-    - master
 before_cache:
   - rm -rf $HOME/.boot/cache/tmp/
 cache:
