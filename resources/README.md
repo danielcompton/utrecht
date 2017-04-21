@@ -1,3 +1,7 @@
+[![Clojars Project](https://img.shields.io/clojars/v/irresponsible/utrecht.svg)](https://clojars.org/irresponsible/utrecht)
+
+[![Travis CI](https://travis-ci.org/irresponsible/utrecht.svg?branch=master)](https://travis-ci.org/irresponsible/utrecht)
+
 The irresponsible clojure guild presents...
 
 # utrecht
@@ -8,9 +12,6 @@ A modern, minimalist database library with an emphasis on correctness,
 stability and performance. We provide a connection pool and a small
 library that makes it easy to work with Postgres.
 
-[![Clojars Project](https://img.shields.io/clojars/v/irresponsible/utrecht.svg)](https://clojars.org/irresponsible/utrecht)
-
-[![Travis CI](https://travis-ci.org/irresponsible/utrecht.svg?branch=master)](https://travis-ci.org/irresponsible/utrecht)
 
 ## Features
 
