@@ -15,7 +15,7 @@ library that makes it easy to work with Postgres.
 
 ## Features
 
-* HikariCP database pool
+* Rock-solid HikariCP database pool
 * Simple api
 * Support for transactions (all isolations) and prepared queries
 * Optional interfaces for 'component' and 'codependence
@@ -24,26 +24,21 @@ Note that while this should in theory work against any sane RDBMS, we only test 
 
 ## Usage
 
-This module requires JDK 8. Please upgrade to JDK 8 to improve
-the security and performance of your applications.
-
 ```clojure
 (ns my.db
  (:require [irresponsible.utrecht :as u]
            [irresponsible.utrecht.pool.hikaricp :refer [hikaricp]])
  (:import  [clojure.lang ExceptionInfo]))
 
-(def opts {:adapter "pgsql"}) ;; we can use pgjdbc-ng (which you should!)
-;; All options are documented in the [hikari-cp](https://github.com/tomekw/hikari-cp) README
-(def pool (hikaricp hikari-pool-opts))
+(def pool (hikaricp {:server-name "127.0.0.1" :username "foo" :password "bar"}))
 (def bars (u/with-conn [conn pool]
             (u/with-prep conn [q "select * from foo where bar = ?"]
               (u/query conn q ["bar"]))) ; query can also take a sql string
 (def quuxs (try ; with-transaction binds a connection like with-conn
               (u/with-transaction :ro :serializable [conn pool]
-                (u/savepoint conn :sp1) ; savepoints!
-                (let [r (u/query conn "select 'foo' as result")]
-                  (u/rollback :sp1) ; rolling back to savepoints!
+                (let [sp1 (u/savepoint conn :sp1) ; savepoints!
+                      r   (u/query conn "select 'foo' as result")]
+                  (u/rollback sp1) ; rolling back to savepoints!
                   (throw (ex-info "throw to rollback the entire transaction" {:result r}))))
               (catch ExceptionInfo e ; yes, your exception is rethrown
                 (:result (ex-data e)))))
@@ -52,15 +47,17 @@ the security and performance of your applications.
 (.close pool)
 ```
 
+Options are documented in the [hikari-cp](https://github.com/tomekw/hikari-cp) README.
+
+If you use pgjdbc-ng, it unhelpfully chooses different property names from the postgres adapter.
+
 ## Recommendations
 
-We highly recommend using this module in conjunction with a recent
-postgres and [mpg](https://github.com/mpg-project/mpg) which
-provides transparent conversion between pg and clojure data types.
+Goes nicely with:
 
-We additionally recommend using the
-[codependence](https://github.com/irresponsible/codependence)
-support for structuring your app
+* A recent version of postgres
+* [mpg](https://github.com/mpg-project/mpg)
+* [codependence](https://github.com/irresponsible/codependence)
 
 ## Hacking
 
