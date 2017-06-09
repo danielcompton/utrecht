@@ -36,7 +36,7 @@ the security and performance of your applications.
 ;; All options are documented in the [hikari-cp](https://github.com/tomekw/hikari-cp) README
 (def pool (hikaricp hikari-pool-opts))
 (def bars (u/with-conn [conn pool]
-            (u/with-prep [q "select * from foo where bar = ?"]
+            (u/with-prep conn [q "select * from foo where bar = ?"]
               (u/query conn q ["bar"]))) ; query can also take a sql string
 (def quuxs (try ; with-transaction binds a connection like with-conn
               (u/with-transaction :ro :serializable [conn pool]
