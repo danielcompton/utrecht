@@ -7,8 +7,6 @@
     '[[org.clojure/clojure "1.9.0-alpha17" :scope "provided"]]))
 
 (set-env!
- :project 'irresponsible/utrecht
-  :version "0.3.0"
   :resource-paths #{"src" "resources"}
   :source-paths #{"src"}
   :dependencies #(into % '[[org.clojure/java.jdbc     "0.7.0-beta2"]
@@ -26,8 +24,8 @@
 (require '[adzerk.boot-test :as t])
 
 (task-options!
-  pom {:project (get-env :project)
-       :version (get-env :version)
+  pom {:project 'irresponsible/utrecht
+       :version "0.3.0"
        :description "Just enough rope to wrangle a jdbc"
        :url "https://github.com/irresponsible/utrecht"
        :scm {:url "https://github.com/irresponsible/utrecht.git"}
