@@ -38,28 +38,9 @@
 (deftask autotest []
   (comp (testing) (watch) (t/test)))
 
-(deftask make-release-jar []
-  (comp (pom) (jar)))
-
-(deftask installdeps []
-  identity)
-
 ;; Release Manager
-(deftask travis-installdeps []
-  identity)
-
-(deftask make-jar []
-  (comp (pom) (jar) (target)))
-
-(deftask install-jar []
-  (comp (pom) (jar) (install)))
-
 (deftask release []
   (comp (pom) (jar) (push)))
-
-(deftask travis []
-  (testing)
-  (t/test))
 
 (deftask jitpak-deploy []
   (task-options! pom {
