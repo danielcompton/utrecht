@@ -13,6 +13,7 @@ cache:
 matrix:
   include:
     - env: JDK=zulu8
+    - env: JDK=zulu8 CLOJURE=1.8
     - env: JDK=zulu9
   allow_failures:
    - env: JDK=zulu9
