@@ -25,7 +25,7 @@
 
 (task-options!
   pom {:project 'irresponsible/utrecht
-       :version "0.3.0"
+       :version "0.3.1"
        :description "Just enough rope to wrangle a jdbc"
        :url "https://github.com/irresponsible/utrecht"
        :scm {:url "https://github.com/irresponsible/utrecht.git"}
