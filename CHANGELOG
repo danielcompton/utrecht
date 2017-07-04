@@ -1,7 +1,7 @@
 Changelog for utrecht
 ---------------------
 
-0.3.0 - 2017-07-04
+0.3.0 - 2017-07-04 77bdcec7de4f0a2a6acb1401957d53bbd4cd43b8
 - Savepoints now use JDBC API's instead of directly.
 - `savepoint` returns `Savepoint` objects
 - `rollback` requires a `Savepoint` object
