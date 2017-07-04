@@ -4,13 +4,13 @@
   :version "0.3.0"
   :resource-paths #{"src" "resources"}
   :source-paths #{"src"}
-  :dependencies '[[org.clojure/clojure       "1.9.0-alpha15" :scope "provided"]
+  :dependencies '[[org.clojure/clojure       "1.9.0-alpha17" :scope "provided"]
                   [org.clojure/java.jdbc     "0.7.0-alpha3"]
                   [hikari-cp                 "1.7.6"]
                   ;; don't force the user to pull in any of these
                   [com.stuartsierra/component "0.3.2"   :scope "test"]
                   [suspendable "0.1.1"                  :scope "test"]
-                  [irresponsible/codependence "0.1.0"   :scope "test"]
+                  [irresponsible/codependence "0.2.0"   :scope "test"]
                   [org.postgresql/postgresql "42.0.0.jre7" :scope "test"]
                   [com.impossibl.pgjdbc-ng/pgjdbc-ng "0.7.1" :scope "test"]
                   [environ "1.0.2"                      :scope "test"]
