@@ -1,6 +1,13 @@
 Changelog for utrecht
 ---------------------
 
+0.3.0 - 2017-07-04
+- Savepoints now use JDBC API's instead of directly.
+- `savepoint` returns `Savepoint` objects
+- `rollback` requires a `Savepoint` object
+- Tests support pgjdbc-ng as well as postgres jdbc
+- Uses hikari-cp 1.7.6 and jdbc 0.7.2-beta2
+
 0.2.0 - 2016-04-28 57c57c3257bcc07127ae2ef0c2efff4e6627cf94
 - Documentation slightly improved
 - Dependency requirements now more flexible.
