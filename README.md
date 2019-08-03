@@ -1,5 +1,5 @@
 [![Clojars Project](https://img.shields.io/clojars/v/irresponsible/utrecht.svg)](https://clojars.org/irresponsible/utrecht)
-
+[![cljdoc badge](https://cljdoc.org/badge/irresponsible/utrecht)](https://cljdoc.org/d/irresponsible/utrecht)
 [![Travis CI](https://travis-ci.org/irresponsible/utrecht.svg?branch=master)](https://travis-ci.org/irresponsible/utrecht)
 
 The irresponsible clojure guild presents...
